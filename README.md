@@ -8,6 +8,8 @@ Damit kriegt man unendlich Takte hin.
 Man kann auch Begrenzung = 0 machen, dann kann man auch höhere Leistungen (VL-Soll einstellen).
 
 Wenn der Takt zu lang wird, also zu warm in der Bude muss man var T_Max = 42 runtersetzen.
+Man sollte ihr aber Luft nach oben geben, also ruhig paar Grad mehr, sonst werden die Takte irgenwann doch ganz kurz.
+Einfach mal die Soll-VL nach z.B. 2h angucken und das kann man dann als T_Max nehmen.
 
 Im wesendlichen besteht die Statemachine aus 2 States:
 
