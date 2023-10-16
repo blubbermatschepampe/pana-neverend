@@ -3,16 +3,20 @@ const Compressor_Freq_MQTT = 'mqtt.0.panasonic_heat_pump.main.Compressor_Freq';
 const ThreeWay_Valve_State_MQTT = 'mqtt.0.panasonic_heat_pump.main.ThreeWay_Valve_State';
 const Main_Outlet_Temp_MQTT = 'mqtt.0.panasonic_heat_pump.main.Main_Outlet_Temp';
 const Main_Inlet_Temp_MQTT = 'mqtt.0.panasonic_heat_pump.main.Main_Inlet_Temp';
+const Watt1_MQTT = 'mqtt.0.panasonic_heat_pump.s0.Watt.1';
+const Heat_Energy_Production_MQTT = 'mqtt.0.panasonic_heat_pump.main.Heat_Energy_Production';
+
 const Timer_MS = 10000;
 //const TimerOneSecond = 1000/10000;
 const TimerOneMinute = 1000*60/10000;
 
 //startup
+createState('javascript.0.VIS.cutpel', 0, {name: 'cut p electric'});
 setInterval(f_statemachine, Timer_MS)
 var state = "state_komp2";		//starten mit eingeschwungenem Zustand fuer Restarts
 var wait1 = 1;
 var dT = 3;
-var begrenzung = 1;                 
+var begrenzung = 0;                 
 var T_Max = 42
 //wenn dies auf 1 steht versucht er die minimale Leistung anzufahren. Man kann es auf 0 setzen, dann kann man auch höher Leistungen fahren indem man SetZ1HeatRequestTemperature hochzieht
 //bis zu T_Max versucht er dann mindestens die minimale Leistung zu halten.
@@ -31,6 +35,8 @@ function f_statemachine()
     let IS_Main_Outlet_Temp = getState(Main_Outlet_Temp_MQTT).val;
     let IS_Main_Inlet_Temp = getState(Main_Inlet_Temp_MQTT).val;
     let ThreeWay_Valve_State = getState(ThreeWay_Valve_State_MQTT).val;
+    let Watt1 = getState(Watt1_MQTT).val;
+    let Heat_Energy_Production= getState(Heat_Energy_Production_MQTT).val;
 
 	//#### for all #################################################
     if (ThreeWay_Valve_State == 1) {state = "state_ww";}
@@ -90,7 +96,7 @@ function f_statemachine()
             console.log("hier3-");
             state = "state_off";
         }
-        else if (IS_Compressor_Freq <= 22)
+        else if (IS_Compressor_Freq <= 20)
         {
             if  (IS_Main_Outlet_Temp >= Z1HeatRequestTemperature + 1.5) {
                 Z1HeatRequestTemperature = Z1HeatRequestTemperature + 1;
@@ -112,24 +118,31 @@ function f_statemachine()
                 }
             }
         }
-        else if ((IS_Compressor_Freq >= 26) && (begrenzung == 1))
+        else if (IS_Compressor_Freq >= 22)
         {
-            Z1HeatRequestTemperature_old = Z1HeatRequestTemperature;
-            if (Z1HeatRequestTemperature - IS_Main_Inlet_Temp > dT + 1 ) {
-                //mindestens dT Grad fuer DeltaT setzen
-                Z1HeatRequestTemperature = IS_Main_Inlet_Temp + dT + 0.5;
+            if((begrenzung == 1)){
+                Z1HeatRequestTemperature_old = Z1HeatRequestTemperature;
+                if (IS_Main_Outlet_Temp - IS_Main_Inlet_Temp > dT ) {
+                    //mindestens dT Grad fuer DeltaT setzen
+                    Z1HeatRequestTemperature = IS_Main_Inlet_Temp + dT;
 
-                if (Z1HeatRequestTemperature < IS_Main_Outlet_Temp - 1) {
-                    //höchstens 1 Grad unter IS_Outlet_T nicht tiefer
-                    Z1HeatRequestTemperature = IS_Main_Outlet_Temp - 1;
-                }
+                    if (Z1HeatRequestTemperature < IS_Main_Outlet_Temp - 1) {
+                        //höchstens 1 Grad unter IS_Outlet_T nicht tiefer
+                        Z1HeatRequestTemperature = IS_Main_Outlet_Temp - 1;
+                    }
 
-                console.log("hier128-");
-                if ((Z1HeatRequestTemperature <= T_Max) && (Z1HeatRequestTemperature < Z1HeatRequestTemperature_old)) {
-                    setState(SetZ1HeatRequestTemperature_MQTT, Z1HeatRequestTemperature);
-                    console.log("hier9-");
+                    Z1HeatRequestTemperature -= 0.25;
+                    console.log("hier128-");
+                    if ((Z1HeatRequestTemperature <= T_Max) && (Z1HeatRequestTemperature < Z1HeatRequestTemperature_old)) {
+                        setState(SetZ1HeatRequestTemperature_MQTT, Z1HeatRequestTemperature);
+                        console.log("hier137-");
+                    }
                 }
             }
+        }
+        else
+        {
+            console.log("hier138");
         }
     }
 	//#####################################################
@@ -145,6 +158,18 @@ function f_statemachine()
     {
         s_outputold = s_output;
         console.log(s_output);
+        console.log("Watt1=" + Watt1 + " COP=" + Heat_Energy_Production/Watt1 + " begrenzung=" + begrenzung);
+        //setState('mqtt.0_userdata.0.COP_heizen_nr',Heat_Energy_Production/Watt1);
     }
-        
+       
 }
+
+on('javascript.0.VIS.cutpel', function (obj) {
+    if (!obj.state.ack && obj.state.val) {
+        // was soll passieren?
+        // hier die Ausführung rein
+        console.log("hier_mmm" + obj.state.val);
+    }
+    console.log("hier_sss" + obj.state.val);
+    begrenzung = obj.state.val;
+});
