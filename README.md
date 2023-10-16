@@ -17,3 +17,8 @@ Das sind so ca 19-21 Hz.
 Zukunft:
 
 Die WP soll komplett Leistungsgesteuert sein.
+
+
+Wenn man einen Slider mit dem Datenpunkt javascript.0.VIS.cutpel verbindet, kann man über 0 und 1 die Begrenzung der Leistung ein und ausstellen.
+Er verringert dann die Soll-VL nicht mehr so weit, dass die WP runterregelt
+Er erhöht dann aber noch die Soll-VL, so dass die WP nicht ausgeht.
