@@ -7,6 +7,8 @@ Es ist in der ersten Ausbaustufe dazu gedacht die WP auf minimaler Leistung zu h
 Damit kriegt man unendlich Takte hin.
 Man kann auch Begrenzung = 0 machen, dann kann man auch höhere Leistungen (VL-Soll einstellen).
 
+Wenn der Takt zu lang wird, also zu warm in der Bude muss man var T_Max = 42 runtersetzen.
+
 Im wesendlichen besteht die Statemachine aus 2 States:
 
 komp1 => die ersten 30 Minuten versucht er nicht Frequenzen < 23 Hz zu erreichen, sondern sorgt dafür, das die WP nicht aus geht.
