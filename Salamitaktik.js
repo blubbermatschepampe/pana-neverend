@@ -6,6 +6,7 @@ const Main_Inlet_Temp_MQTT = 'mqtt.0.panasonic_heat_pump.main.Main_Inlet_Temp';
 const Watt1_MQTT = 'mqtt.0.panasonic_heat_pump.s0.Watt.1';
 const Heat_Energy_Production_MQTT = 'mqtt.0.panasonic_heat_pump.main.Heat_Energy_Production';
 
+//scalieren über marking im echarts
 const Timer_MS = 10000;
 
 //startup
@@ -14,7 +15,7 @@ createState('javascript.0.VIS.cop', 0, {name: 'cop berechnen'});
 createState('javascript.0.VIS.output', "x", {name: 'x'});
 
 setInterval(f_statemachine, Timer_MS)
-var state = "state_komp2";		//starten mit eingeschwungenem Zustand fuer Restarts
+var state = "state_komp_running";		//starten mit eingeschwungenem Zustand fuer Restarts
 var waitseconds = 0;
 var dT = 3;
 var begrenzung = 1;                 
@@ -23,8 +24,8 @@ var Z1HeatRequestTemperature_old = 0;
 //wenn dies auf 1 steht versucht er die minimale Leistung anzufahren. Man kann es auf 0 (über VIS) setzen, dann kann man auch höher Leistungen fahren indem man SetZ1HeatRequestTemperature hochzieht
 //bis zu T_Max versucht er dann mindestens die minimale Leistung zu halten.
 
-//var state = "state_komp1";		//starten mit eingeschwungenem Zustand =erste 30 Minuten fuer Restarts
-//var wait1 = 30*60;
+//var state = "state_komp_start";		//starten mit eingeschwungenem Zustand =erste 30 Minuten fuer Restarts
+//var wait1 = 850;
 var s_outputold = "";
 
 //##### set volrauf soll ###############################
@@ -32,9 +33,24 @@ function f_setvl( x )
 {
     if ((x != Z1HeatRequestTemperature_old) && ( x < T_Max))
     {
-        setState(SetZ1HeatRequestTemperature_MQTT, x);
-        Z1HeatRequestTemperature_old = x;
+        //ungleich old und kleiner T_Max
+        if (Z1HeatRequestTemperature_old > x)
+        {
+            console.log("up");
+            setState(SetZ1HeatRequestTemperature_MQTT, x);
+            Z1HeatRequestTemperature_old = x;
+        }
+        else
+        {
+            if((begrenzung == 1))
+            {
+                console.log("down");
+                setState(SetZ1HeatRequestTemperature_MQTT, x);
+                Z1HeatRequestTemperature_old = x;
+            }
+        }
     }
+
 }
 //##### statemachine ###############################
 function f_statemachine()
@@ -49,6 +65,7 @@ function f_statemachine()
     let Heat_Energy_Production= getState(Heat_Energy_Production_MQTT).val;
     let Z1HeatRequestTemperature_new = 0;
     Z1HeatRequestTemperature_new = Z1HeatRequestTemperature;
+    begrenzung = getState('javascript.0.VIS.cutpel').val;   //über VIS = 0 keine Leistungsbegrenzung =1 Leistungsbegrenzung
 
 	//#### for all #################################################
     if (ThreeWay_Valve_State == 1) {state = "state_ww";}
@@ -63,12 +80,12 @@ function f_statemachine()
         case "state_ww":
             if (ThreeWay_Valve_State == 0) 
             { 
-                state = "state_komp1";
+                state = "state_komp_start";
                 waitseconds = 30*60;
             }
         break;
         //#####################################################
-        case "state_komp1":
+        case "state_komp_start":
             if (IS_Main_Outlet_Temp >= Z1HeatRequestTemperature_new + 1.5)
             {
                 Z1HeatRequestTemperature_new = IS_Main_Outlet_Temp;
@@ -94,11 +111,11 @@ function f_statemachine()
 
             if (waitseconds <= 0)
             {
-                state = "state_komp2";
+                state = "state_komp_running";
             }
         break;
         //#####################################################
-        case "state_komp2":
+        case "state_komp_running":
             if (IS_Compressor_Freq == 0) {
                 Z1HeatRequestTemperature_new = 24;
                 f_setvl(Z1HeatRequestTemperature_new);
@@ -127,7 +144,7 @@ function f_statemachine()
             }
             else if (IS_Compressor_Freq >= 22)
             {
-                if((begrenzung == 1))
+                //if((begrenzung == 1))
                 {
                     if (IS_Main_Outlet_Temp - IS_Main_Inlet_Temp > dT ) 
                     {
@@ -173,11 +190,10 @@ function f_statemachine()
        
 }
 
+//event, wenn slider gelupft wird
 on('javascript.0.VIS.cutpel', function (obj) {
     if (!obj.state.ack && obj.state.val) {
-        // was soll passieren?
-        // hier die Ausführung rein
-        console.log("hier_mmm" + obj.state.val);
+        //console.log("hier_mmm" + obj.state.val);
     }
     console.log("hier_sss" + obj.state.val);
     begrenzung = obj.state.val;
