@@ -1,6 +1,6 @@
 # pana-neverend
 
-Dieses Skript läuft auf IO-Broker mit eine Pana-WP.
+Dieses Skript läuft auf IO-Broker mit einer Pana-J-WP.
 
 Es ist in der ersten Ausbaustufe dazu gedacht die WP auf minimaler Leistung zu halten und deswegen geht er langsam mit der VL-Soll hoch bis zu VL_Max = 42.
 
