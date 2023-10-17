@@ -25,6 +25,8 @@ Wenn man einen Slider mit dem Datenpunkt javascript.0.VIS.cutpel verbindet, kann
 Er verringert dann die Soll-VL nicht mehr so weit, dass die WP runterregelt
 Er erhöht dann aber noch die Soll-VL, so dass die WP nicht ausgeht.
 
+Der Datenpunkt für den Stromzähler braucht man nicht, er ist nur zur COP Berechnung, man kann den ungenauen internen Wert nehmen, wenn man möchte
+================================================================================
 Zukunft:
 
 Die WP soll komplett Leistungsgesteuert sein.
