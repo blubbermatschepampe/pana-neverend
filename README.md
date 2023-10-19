@@ -16,9 +16,9 @@ Einfach mal die Soll-VL nach z.B. 2h angucken und das kann man dann als T_Max ne
 
 Im wesendlichen besteht die Statemachine aus 2 States:
 
-komp1 => die ersten 30 Minuten versucht er nicht Frequenzen < 23 Hz zu erreichen, sondern sorgt dafür, das die WP nicht aus geht.
+komp_startup => die ersten 30 Minuten versucht er nicht Frequenzen < 23 Hz zu erreichen, sondern sorgt dafür, das die WP nicht aus geht.
 
-komp2 => nach den ersten 30 Minuten versucht er die VL-Soll immer weiter zu senken (nur bei Begrenzung = 1), damit die Frequenz (Leistung) minimal wird.
+komp_running => nach den ersten 30 Minuten versucht er die VL-Soll immer weiter zu senken (nur bei Begrenzung = 1), damit die Frequenz (Leistung) minimal wird.
 Das sind so ca 19-21 Hz.
 
 Wenn man einen Slider mit dem Datenpunkt javascript.0.VIS.cutpel verbindet, kann man über 0 und 1 die Begrenzung der Leistung ein und ausstellen.
