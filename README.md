@@ -8,7 +8,7 @@ Damit kriegt man unendlich Takte hin.
 Man kann auch Begrenzung = 0 machen, dann kann man auch höhere Leistungen (VL-Soll einstellen).
 
 Achso: Wenn ein Takt zu ende ist setzt er den Soll-VL auf 24 Grad, damit er erstmal aus bleibt.
-Wird vermutlich irgendwann mal anders gemacht.
+Wird vermutlich irgendwann mal anders gemacht. Wer das nicht möchte löscht die Zeile mit der 24 raus.
 
 Wenn der Takt zu lang wird, also zu warm in der Bude muss man var T_Max = 42 runtersetzen.
 Man sollte ihr aber Luft nach oben geben, also ruhig paar Grad mehr, sonst werden die Takte irgenwann doch ganz kurz.
