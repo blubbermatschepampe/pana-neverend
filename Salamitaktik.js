@@ -11,6 +11,8 @@ const Timer_MS = 10000;
 
 //startup
 createState('javascript.0.VIS.cutpel', 1, {name: 'cut p electric'});
+createState('javascript.0.VIS.cutpeltmax', 42, {name: 'cut p electric tmax'});
+createState('javascript.0.VIS.cutpeltoff', 24, {name: 'cut p electric toff'});
 createState('javascript.0.VIS.cop', 0, {name: 'cop berechnen'});
 createState('javascript.0.VIS.output', "x", {name: 'x'});
 
@@ -19,7 +21,8 @@ var state = "state_komp_running";		//starten mit eingeschwungenem Zustand fuer R
 var waitseconds = 0;
 var dT = 3;
 var begrenzung = 1;                 
-var T_Max = 42
+var T_Max = 42;
+var T_Off = 24;
 var Z1HeatRequestTemperature_old = 0;
 //wenn dies auf 1 steht versucht er die minimale Leistung anzufahren. Man kann es auf 0 (über VIS) setzen, dann kann man auch höher Leistungen fahren indem man SetZ1HeatRequestTemperature hochzieht
 //bis zu T_Max versucht er dann mindestens die minimale Leistung zu halten.
@@ -34,7 +37,7 @@ function f_setvl( x )
     if ((x != Z1HeatRequestTemperature_old) && ( x < T_Max))
     {
         //ungleich old und kleiner T_Max
-        if (Z1HeatRequestTemperature_old > x)
+        if (Z1HeatRequestTemperature_old < x)
         {
             console.log("up");
             setState(SetZ1HeatRequestTemperature_MQTT, x);
@@ -66,6 +69,8 @@ function f_statemachine()
     let Z1HeatRequestTemperature_new = 0;
     Z1HeatRequestTemperature_new = Z1HeatRequestTemperature;
     begrenzung = getState('javascript.0.VIS.cutpel').val;   //über VIS = 0 keine Leistungsbegrenzung =1 Leistungsbegrenzung
+    T_Max = getState('javascript.0.VIS.cutpeltmax').val;   //über VIS maximale Temperatur bis wohin er moduliert
+    T_Off = getState('javascript.0.VIS.cutpeltoff').val;   //über VIS Temperatur die am Ende des Zyklusses eingestellt wird
 
 	//#### for all #################################################
     if (ThreeWay_Valve_State == 1) {state = "state_ww";}
@@ -117,7 +122,7 @@ function f_statemachine()
         //#####################################################
         case "state_komp_running":
             if (IS_Compressor_Freq == 0) {
-                Z1HeatRequestTemperature_new = 24;
+                Z1HeatRequestTemperature_new = T_Off;
                 f_setvl(Z1HeatRequestTemperature_new);
                 console.log("hier104-");
                 state = "state_off";
