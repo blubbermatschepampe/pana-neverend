@@ -20,7 +20,7 @@ setInterval(f_statemachine, Timer_MS)
 var state = "state_komp_running";		//starten mit eingeschwungenem Zustand fuer Restarts
 var waitseconds = 0;
 var dT = 3;
-var begrenzung = 1;                 
+var cutpel = 1;                 
 var T_Max = 42;
 var T_Off = 24;
 var Z1HeatRequestTemperature_old = 0;
@@ -40,18 +40,13 @@ function f_setvl( x )
         if (Z1HeatRequestTemperature_old < x)
         {
             console.log("up");
-            setState(SetZ1HeatRequestTemperature_MQTT, x);
-            Z1HeatRequestTemperature_old = x;
         }
         else
         {
-            if((begrenzung == 1))
-            {
-                console.log("down");
-                setState(SetZ1HeatRequestTemperature_MQTT, x);
-                Z1HeatRequestTemperature_old = x;
-            }
+            console.log("down");
         }
+            setState(SetZ1HeatRequestTemperature_MQTT, x);
+            Z1HeatRequestTemperature_old = x;
     }
 
 }
@@ -68,7 +63,7 @@ function f_statemachine()
     let Heat_Energy_Production= getState(Heat_Energy_Production_MQTT).val;
     let Z1HeatRequestTemperature_new = 0;
     Z1HeatRequestTemperature_new = Z1HeatRequestTemperature;
-    begrenzung = getState('javascript.0.VIS.cutpel').val;   //über VIS = 0 keine Leistungsbegrenzung =1 Leistungsbegrenzung
+    cutpel = getState('javascript.0.VIS.cutpel').val;   //über VIS = 0 keine Leistungsbegrenzung =1 Leistungsbegrenzung
     T_Max = getState('javascript.0.VIS.cutpeltmax').val;   //über VIS maximale Temperatur bis wohin er moduliert
     T_Off = getState('javascript.0.VIS.cutpeltoff').val;   //über VIS Temperatur die am Ende des Zyklusses eingestellt wird
 
@@ -95,19 +90,20 @@ function f_statemachine()
             {
                 Z1HeatRequestTemperature_new = IS_Main_Outlet_Temp;
                 f_setvl(Z1HeatRequestTemperature_new);
-                console.log("hier75+");
+                console.log("hier93+");
             }
             if (Z1HeatRequestTemperature_new - IS_Main_Inlet_Temp <= dT + 1)
             {
                 Z1HeatRequestTemperature_new = IS_Main_Inlet_Temp + dT + 1;
                 f_setvl(Z1HeatRequestTemperature_new);
-                console.log("hier81+");
+                console.log("hier99+");
             }
-            if (IS_Compressor_Freq >= 26) {
+            if ((IS_Compressor_Freq >= 26) && (cutpel == 1))
+            {
                 if (Z1HeatRequestTemperature_new > IS_Main_Outlet_Temp){
                     Z1HeatRequestTemperature_new = IS_Main_Outlet_Temp;
                     f_setvl(Z1HeatRequestTemperature_new);
-                    console.log("hier87-");
+                    console.log("hier105-");
                 }
             }
             if (IS_Compressor_Freq == 0) {
@@ -124,7 +120,7 @@ function f_statemachine()
             if (IS_Compressor_Freq == 0) {
                 Z1HeatRequestTemperature_new = T_Off;
                 f_setvl(Z1HeatRequestTemperature_new);
-                console.log("hier104-");
+                console.log("hier122-");
                 state = "state_off";
             }
             else if (IS_Compressor_Freq <= 20)
@@ -149,7 +145,7 @@ function f_statemachine()
             }
             else if (IS_Compressor_Freq >= 22)
             {
-                //if((begrenzung == 1))
+                if(cutpel == 1)
                 {
                     if (IS_Main_Outlet_Temp - IS_Main_Inlet_Temp > dT ) 
                     {
@@ -188,7 +184,7 @@ function f_statemachine()
     {
         s_outputold = s_output;
         console.log(s_output);
-        console.log("Watt1=" + Watt1 + " COP=" + (Heat_Energy_Production/Watt1).toFixed(2) + " begrenzung=" + begrenzung);
+        console.log("Watt1=" + Watt1 + " COP=" + (Heat_Energy_Production/Watt1).toFixed(2) + " cutpel=" + cutpel);
         setState('javascript.0.VIS.cop', (Heat_Energy_Production/Watt1).toFixed(2));
         setState('javascript.0.VIS.output', s_output);
     }
