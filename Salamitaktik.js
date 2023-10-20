@@ -197,5 +197,5 @@ on('javascript.0.VIS.cutpel', function (obj) {
         //console.log("hier_mmm" + obj.state.val);
     }
     console.log("hier_sss" + obj.state.val);
-    begrenzung = obj.state.val;
+    cutpel = obj.state.val;
 });
