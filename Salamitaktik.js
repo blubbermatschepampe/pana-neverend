@@ -163,7 +163,7 @@ function f_statemachine()
                         {
                             console.log("hier145-");
                             f_setvl(Z1HeatRequestTemperature_new);
-                            waitseconds=10*60;
+                            waitseconds=5*60;
                         }
                     }
                 }
@@ -179,12 +179,12 @@ function f_statemachine()
     
     let s_output = "IS_Compressor_Freq="+IS_Compressor_Freq +" IS_Inlet_T="+IS_Main_Inlet_Temp +" IS_Outlet_T="+IS_Main_Outlet_Temp +" 3="+ ThreeWay_Valve_State +" wait="+waitseconds;
     s_output += " dT=" + (IS_Main_Outlet_Temp - IS_Main_Inlet_Temp) + " abst=" + (Z1HeatRequestTemperature_new - IS_Main_Outlet_Temp)+" state="+state +" VL_new="+Z1HeatRequestTemperature_new;
-    s_output += " VL="+Z1HeatRequestTemperature;
+    s_output += " VL="+Z1HeatRequestTemperature + " cutpel=" + cutpel;
     if (s_outputold != s_output)
     {
         s_outputold = s_output;
         console.log(s_output);
-        console.log("Watt1=" + Watt1 + " COP=" + (Heat_Energy_Production/Watt1).toFixed(2) + " cutpel=" + cutpel);
+        //console.log("Watt1=" + Watt1 + " COP=" + (Heat_Energy_Production/Watt1).toFixed(2) + " cutpel=" + cutpel);
         setState('javascript.0.VIS.cop', (Heat_Energy_Production/Watt1).toFixed(2));
         setState('javascript.0.VIS.output', s_output);
     }
