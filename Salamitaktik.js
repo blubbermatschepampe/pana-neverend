@@ -17,8 +17,8 @@ createState('javascript.0.VIS.cop', 0, {name: 'cop berechnen'});
 createState('javascript.0.VIS.output', "x", {name: 'x'});
 
 setInterval(f_statemachine, Timer_MS)
-var state = "state_komp_running";		//starten mit eingeschwungenem Zustand fuer Restarts
-var waitseconds = 0;
+//var state = "state_komp_running";		//starten mit eingeschwungenem Zustand fuer Restarts
+//var waitseconds = 0;
 var dT = 3;
 var cutpel = 1;                 
 var T_Max = 42;
@@ -27,8 +27,8 @@ var Z1HeatRequestTemperature_old = 0;
 //wenn dies auf 1 steht versucht er die minimale Leistung anzufahren. Man kann es auf 0 (über VIS) setzen, dann kann man auch höher Leistungen fahren indem man SetZ1HeatRequestTemperature hochzieht
 //bis zu T_Max versucht er dann mindestens die minimale Leistung zu halten.
 
-//var state = "state_komp_start";		//starten mit eingeschwungenem Zustand =erste 30 Minuten fuer Restarts
-//var wait1 = 850;
+var state = "state_komp_start";		//starten mit eingeschwungenem Zustand =erste 30 Minuten fuer Restarts
+var waitseconds = 700;
 var s_outputold = "";
 
 //##### set volrauf soll ###############################
@@ -159,7 +159,7 @@ function f_statemachine()
                         }
 
                         //Z1HeatRequestTemperature -= 0.25;
-                        if (waitseconds <= 0)
+                        if ((waitseconds <= 0)||(Z1HeatRequestTemperature_new < Z1HeatRequestTemperature))
                         {
                             console.log("hier145-");
                             f_setvl(Z1HeatRequestTemperature_new);
