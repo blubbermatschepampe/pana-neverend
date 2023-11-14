@@ -2,33 +2,48 @@
 
 Dieses Skript läuft auf IO-Broker + Heishamon mit einer Pana-J-WP.
 =====
-Es ist in der ersten Ausbaustufe dazu gedacht die WP auf minimaler Leistung zu halten und deswegen geht er langsam mit der VL-Soll hoch bis zu VL_Max = 42.
+Also im Grunde ist das Skript eine Abwandlung von der Moehrchentaktik. Die allerdings nutzt die Sollwertverschiebung und den Flüstermodus, so weit ich mich erinnere.
 
-Damit kriegt man unendlich Takte hin.
-Man kann auch Begrenzung = 0 machen, dann kann man auch höhere Leistungen (VL-Soll einstellen).
 
-Achso: Wenn ein Takt zu ende ist setzt er den Soll-VL auf 24 Grad, damit er erstmal aus bleibt.
-Wird vermutlich irgendwann mal anders gemacht. Wer das nicht möchte löscht die Zeile mit der 24 raus.
 
-Wenn der Takt zu lang wird, also zu warm in der Bude muss man var T_Max = 42 runtersetzen.
-Man sollte ihr aber Luft nach oben geben, also ruhig paar Grad mehr, sonst werden die Takte irgenwann doch ganz kurz.
-Einfach mal die Soll-VL nach z.B. 2h angucken und das kann man dann als T_Max nehmen.
+Mein Skript läuft bei mir auf HK im Altbau auf der Jeisha 09.
 
-Im wesendlichen besteht die Statemachine aus 2 States:
+Meine Pumpenrate ist auf maximal 15 l/min und mein dT auf 3. SollVL aktuell auf 32 Grad @AT5 Grad.
 
-komp_startup => die ersten 30 Minuten versucht er nicht Frequenzen < 23 Hz zu erreichen, sondern sorgt dafür, das die WP nicht aus geht.
+(dT sollte deshalb gleich eingestellt sein wie bei der WP.)
 
-komp_running => nach den ersten 30 Minuten versucht er die VL-Soll immer weiter zu senken (nur bei Begrenzung = 1), damit die Frequenz (Leistung) minimal wird.
-Das sind so ca 19-21 Hz.
+Die WP läuft für das Skript mit Festwert, der Vorteil ist das man gegenüber der SWV dann mehr Bonusgrade geben kann.
 
-Wenn man einen Slider mit dem Datenpunkt javascript.0.VIS.cutpel verbindet, kann man über 0 und 1 die Begrenzung der Leistung ein und ausstellen.
-Er verringert dann die Soll-VL nicht mehr so weit, dass die WP runterregelt
-Er erhöht dann aber noch die Soll-VL, so dass die WP nicht ausgeht.
+In Tmax=46 stellt man so die maximale VL-Temperatur ein. Tmax ist bei mir so eingestellt, die erreicht er eigentlich nie. d.h. er macht einen unendlich langen Takt. Sollte er es doch erreichen würde der Kompressor abgeschaltet und Toff wird eingestellt. Je geringer Toff desto länger wäre dann die Taktpause. Je größer Tmax, desto länger der Einschalttakt. Tmin=23 würde bei mir bedeuten, dass er auf sich auf minimale VL-Soll einstellt und damit auf minimale Leistung. Das sind so 400-600Watt oder 19-22Hz. Da das nun zu wenig ist bei den AT kann man über Tmin etwas mehr einstellen, was dann die minimale VL-Temp angibt. Er fährt also die Leistung so weit runter, bis er eigentlich Tmin als SollVL erreicht und bleibt da. Tmin ist also quasi als erster Punkt der Heizkurve zu verstehen. Später, wenn es kälter wird werde ich noch eine Gerade oder mehr Punkte einbauen. Aktuell ist es so >10Grad AT kann ich Tmin auf z.b. 20 stellen und mit minimaler Leistung einen sehr langen Takt fahren (z.b. 30 Grad VL bei mir). Oder bei AT<10 Grad stelle ich auf Tmin=32 Grad, damit der Soll-VL nie unter 32 fällt.
 
-Der Datenpunkt für den Stromzähler braucht man nicht, er ist nur zur COP Berechnung, man kann den ungenauen internen Wert nehmen, wenn man möchte
-================================================================================
-Zukunft:
 
-Die WP soll komplett Leistungsgesteuert sein.
 
-Heizkurve im Skript drin
+Einzustellende Inputs also Tmin (Slider), Tmax(Slider), dT(im Skript)
+
+Outputs ist Z1HeatRequestTemperature
+
+
+
+Es sind noch einige andere Variablen drin, die aber nicht mehr gebraucht werden.
+
+Über das Log kann man sehen was er gerade macht.
+
+Über die
+
+javascript.0.VIS.cop gibt er den Cop aus, Strom würde er über S0 messen, braucht man aber nicht
+
+javascript.0.VIS.output sieht man sowas ähnliches wie im Log kann man in der Vis anzeigen, braucht man auch nicht.
+
+
+
+Funktion: Es gibt States, läuft er im Heizbetrieb greift er in die Regelung ein.
+
+Die versucht eigentlich nur immer den Soll-VL 1 Grad unter Ist-VL zu halten und dT einzuhalten.
+
+Das führt dann dazu, dass beim Einschalten der WP diese erstmal relativ viel Gas gibt aber genug Luft bekommt damit sie mit Sicherheit nicht ausgeht. Nach einiger Zeit steigt der VL nicht mehr und er versucht den Soll-VL immer runterzudrücken. Dabei soll die WP an bleiben und reduziert logischer weise die Leistung immer weiter. Damit die Leistung nicht zu gering wird, kann man Tmin vorgeben.
+
+Analog dazu kann man Tmax vorgeben. Ist es draußen beispielsweise 18 Grad könnte es schon sein, dass die WP ihre Leistung die ja minimal ca. 2600 Watt thermisch beträgt nicht los wird und der Soll-VL immer weiter hoch geht. Dabei bleibt sie aber nach dem Anlaufen wo sie wohl mehr Gas gibt, vielleicht für die Schmierung oder auch um Soll schnell zu erreichen auf minimaler Leistung. Frisst also kein Brot, weil in der Zeit eh genug PV da ist.....
+
+
+
+Naja so die Überlegung und meine Anwendung.
