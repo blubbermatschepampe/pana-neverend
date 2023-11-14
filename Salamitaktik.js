@@ -36,44 +36,51 @@ var waitseconds = 0;
 var s_outputold = "";
 
 //##### set volrauf soll ###############################
-function f_setvl( x )
+/**
+* @param {number} temp1
+*/
+function f_setvl( temp1 )
 {
-    if ( x < T_sollVLmin)
+    if ( temp1 < T_sollVLmin)
     {
-        x = T_sollVLmin;
+        temp1 = T_sollVLmin;
     }
-	if ( x > T_Max)
+	if ( temp1 > T_Max)
 	{
-		x = T_Max;
+		temp1 = T_Max;
 	}
-    console.log("old,x" +Z1HeatRequestTemperature_old + " " + x);
-    if (x != Z1HeatRequestTemperature_old)
+    console.log("old,temp1 " +Z1HeatRequestTemperature_old + " " + temp1);
+    if (temp1 != Z1HeatRequestTemperature_old)
     {
         //ungleich old und kleiner T_Max
-        if (Z1HeatRequestTemperature_old < x)
+        if (Z1HeatRequestTemperature_old < temp1)
         {
             console.log("up");
         }
         else
         {
             console.log("down");
-            if (Z1HeatRequestTemperature_old - x > 0.5)
+            if (Z1HeatRequestTemperature_old - temp1 > 0.5)
             {
                 //nix machen
             }
         }
     }
-    setState(SetZ1HeatRequestTemperature_MQTT, x);
-    Z1HeatRequestTemperature_old = x;
+    setState(SetZ1HeatRequestTemperature_MQTT, temp1.toString());
+    Z1HeatRequestTemperature_old = temp1;
 }
 
-function f_bigger(x,y)
+/**
+* @param {number} value1
+* @param {number} value2
+*/
+function f_bigger(value1, value2)
 {
-	if (x < y)
+	if (value1 < value2)
 	{
-		x=y;
+		value1 = value2;
 	}
-	return x;
+	return value1;
 }
 //##### statemachine ###############################
 function f_statemachine()
