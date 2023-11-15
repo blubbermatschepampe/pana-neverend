@@ -34,6 +34,7 @@ var Z1HeatRequestTemperature_old = 0;
 var state = "state_komp_running";		//starten mit eingeschwungenem Zustand =erste 30 Minuten fuer Restarts
 var waitseconds = 0;
 var s_outputold = "";
+var writes = 0;
 
 //##### set volrauf soll ###############################
 /**
@@ -41,6 +42,9 @@ var s_outputold = "";
 */
 function f_setvl( temp1 )
 {
+    let go_further = 1;
+    temp1 = Math.trunc(temp1);
+
     if ( temp1 < T_sollVLmin)
     {
         temp1 = T_sollVLmin;
@@ -49,25 +53,51 @@ function f_setvl( temp1 )
 	{
 		temp1 = T_Max;
 	}
-    console.log("old,temp1 " +Z1HeatRequestTemperature_old + " " + temp1);
+    //console.log("old " +Z1HeatRequestTemperature_old + " temp1 " + temp1 + " anzahl" + writes);
     if (temp1 != Z1HeatRequestTemperature_old)
     {
         //ungleich old und kleiner T_Max
         if (Z1HeatRequestTemperature_old < temp1)
         {
             console.log("up");
+            go_further = 1;             //immer ausführen
         }
         else
         {
             console.log("down");
-            if (Z1HeatRequestTemperature_old - temp1 > 0.5)
+            if (waitseconds == 0)
             {
-                //nix machen
+                waitseconds = 10*60;
+                go_further = 1;         //einmal ausführen und sperren
+            }
+            else
+            {
+                go_further = 0;         //sperren bis waitseconds == 0
+            }
+        }
+        if (cutpel == 1)
+        {
+            if (go_further == 1) 
+            {
+                setState(SetZ1HeatRequestTemperature_MQTT, temp1.toString());
+                writes = writes + 1;
             }
         }
     }
-    setState(SetZ1HeatRequestTemperature_MQTT, temp1.toString());
     Z1HeatRequestTemperature_old = temp1;
+}
+
+//##### set volrauf soll ###############################
+/**
+* @param {number} temp1
+*/
+function f_setvlforce( temp1 )
+{
+    if (cutpel == 1)
+    {
+        setState(SetZ1HeatRequestTemperature_MQTT, temp1.toString());
+        writes = writes + 1;
+    }
 }
 
 /**
@@ -132,7 +162,7 @@ function f_statemachine()
         case "state_komp_running":
             if (IS_Compressor_Freq == 0) 
 			{
-				setState(SetZ1HeatRequestTemperature_MQTT, T_Off);
+				f_setvlforce(T_Off);
                 state = "state_off";
             }
             else 
@@ -152,7 +182,7 @@ function f_statemachine()
     
     let s_output = "IS_Compressor_Freq="+IS_Compressor_Freq +" IS_Inlet_T="+IS_Main_Inlet_Temp +" IS_Outlet_T="+IS_Main_Outlet_Temp +" 3="+ ThreeWay_Valve_State +" wait="+waitseconds;
     s_output += " dT=" + (IS_Main_Outlet_Temp - IS_Main_Inlet_Temp) + " abst=" + (Z1HeatRequestTemperature_new - IS_Main_Outlet_Temp)+" state="+state +" VL_new="+Z1HeatRequestTemperature_new;
-    s_output += " VL="+Z1HeatRequestTemperature + " cutpel=" + cutpel;
+    s_output += " VL="+Z1HeatRequestTemperature + " cutpel=" + cutpel + " writes=" + writes;
     if (s_outputold != s_output)
     {
         s_outputold = s_output;
