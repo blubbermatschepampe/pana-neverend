@@ -167,8 +167,21 @@ function f_statemachine()
             }
             else 
             {
-				Z1HeatRequestTemperature_new = IS_Main_Inlet_Temp + dT;
-				Z1HeatRequestTemperature_new = f_bigger(Z1HeatRequestTemperature_new, IS_Main_Outlet_Temp - 1);
+                Z1HeatRequestTemperature_new = IS_Main_Inlet_Temp + dT;
+                Z1HeatRequestTemperature_new = f_bigger(Z1HeatRequestTemperature_new, IS_Main_Outlet_Temp - 1);
+                if (IS_Compressor_Freq <= 20)
+                {
+                    // outlet outlet-1 trunc diff 
+                    // 30     29       29    1        ok
+                    // 30,25  29,25    29    1,25     ok
+                    // 30,5   29,5     29    1,5      nok
+                    // 30,75  29,75    29    1,75     nok
+                    Z1HeatRequestTemperature_new = Math.trunc(Z1HeatRequestTemperature_new);
+                    if (IS_Main_Outlet_Temp - Z1HeatRequestTemperature_new >= 1.5)
+                    {
+                        Z1HeatRequestTemperature_new = Z1HeatRequestTemperature_new + 1;            //wieder einen erhöhen
+                    }
+                }
 				f_setvl(Z1HeatRequestTemperature_new);
             }
         break;
