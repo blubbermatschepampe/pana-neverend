@@ -6,6 +6,7 @@ const Main_Inlet_Temp_MQTT = 'mqtt.0.panasonic_heat_pump.main.Main_Inlet_Temp';
 const Watt1_MQTT = 'mqtt.0.panasonic_heat_pump.s0.Watt.1';
 const Heat_Energy_Production_MQTT = 'mqtt.0.panasonic_heat_pump.main.Heat_Energy_Production';
 const Defrosting_State_MQTT = 'mqtt.0.panasonic_heat_pump.main.Defrosting_State';
+const AT_MQTT = 'mqtt.0.panasonic_heat_pump.main.Outside_Temp';
 
 //scalieren über marking im echarts
 const Timer_MS = 1000;
@@ -16,8 +17,14 @@ createState('javascript.0.VIS.cutpeltmax', 42, {name: 'cut p electric tmax'});
 createState('javascript.0.VIS.cutpeltoff', 24, {name: 'cut p electric toff'});
 createState('javascript.0.VIS.cop', 0, {name: 'cop berechnen'});
 createState('javascript.0.VIS.output', "x", {name: 'x'});
-createState('javascript.0.VIS.WP_T_sollVlmin', "32", {name: 'WP soll VL min'});
+//createState('javascript.0.VIS.WP_T_sollVlmin', "32", {name: 'WP soll VL min'});
 
+createState('javascript.0.VIS.WP_T_VL_10' , 32, {name: ''});
+createState('javascript.0.VIS.WP_T_VL_5'  , 34, {name: ''});
+createState('javascript.0.VIS.WP_T_VL_0'  , 36, {name: ''});
+createState('javascript.0.VIS.WP_T_VL_M5' , 38, {name: ''});
+createState('javascript.0.VIS.WP_T_VL_M10', 40, {name: ''});
+createState('javascript.0.VIS.WP_T_VL_M15', 42, {name: ''});
 
 setInterval(f_statemachine, Timer_MS)
 
@@ -27,6 +34,8 @@ let T_Max = 42;
 let T_Off = 24;
 let T_sollVLmin = 32;
 let Z1HeatRequestTemperature = 0;
+
+let WP_T_VL_10;
 //wenn dies auf 1 steht versucht er die minimale Leistung anzufahren. Man kann es auf 0 (über VIS) setzen, dann kann man auch höher Leistungen fahren indem man SetZ1HeatRequestTemperature hochzieht
 //bis zu T_Max versucht er dann mindestens die minimale Leistung zu halten.
 
@@ -66,7 +75,7 @@ function f_setvl( temp1 )
             console.log("down");
             if (waitseconds == 0)
             {
-                waitseconds = 10*60;
+                waitseconds = 1*60;
                 go_further = 1;         //einmal ausführen und sperren
             }
             else
@@ -127,9 +136,22 @@ function f_statemachine()
     cutpel = getState('javascript.0.VIS.cutpel').val;   //über VIS = 0 keine Leistungsbegrenzung =1 Leistungsbegrenzung
     T_Max = getState('javascript.0.VIS.cutpeltmax').val;   //über VIS maximale Temperatur bis wohin er moduliert
     T_Off = getState('javascript.0.VIS.cutpeltoff').val;   //über VIS Temperatur die am Ende des Zyklusses eingestellt wird
-	T_sollVLmin = getState('javascript.0.VIS.WP_T_sollVlmin').val;   //über VIS Temperatur die minimal angefahren werden soll
+	//T_sollVLmin = getState('javascript.0.VIS.WP_T_sollVlmin').val;   //über VIS Temperatur die minimal angefahren werden soll
+    let T_AT = getState(AT_MQTT).val;
 
-	//#### for all #################################################
+    if (T_AT >= 10)
+        {T_sollVLmin = getState('javascript.0.VIS.WP_T_VL_10').val;}
+    else if (T_AT >= 5)
+	    {T_sollVLmin = getState('javascript.0.VIS.WP_T_VL_5').val;}
+    else if (T_AT >= 0)
+	    {T_sollVLmin = getState('javascript.0.VIS.WP_T_VL_0').val;}
+    else if (T_AT >= -5)
+	    {T_sollVLmin = getState('javascript.0.VIS.WP_T_VL_M5').val;}
+    else if (T_AT >= -10)
+	    {T_sollVLmin = getState('javascript.0.VIS.WP_T_VL_M10').val;}
+    else
+	    {T_sollVLmin = getState('javascript.0.VIS.WP_T_VL_M15').val;}
+    //#### for all #################################################
     if (ThreeWay_Valve_State == 1) {state = "state_ww";}
     if (Defrosting_State == 1) {state = "state_defrost";}
 
@@ -196,9 +218,10 @@ function f_statemachine()
         waitseconds = 0;
     }
     
-    let s_output = "IS_Compressor_Freq="+IS_Compressor_Freq +" IS_Inlet_T="+IS_Main_Inlet_Temp +" IS_Outlet_T="+IS_Main_Outlet_Temp +" 3="+ ThreeWay_Valve_State +" wait="+waitseconds;
+    let s_output = "Freq="+IS_Compressor_Freq +" IS_Inlet_T="+IS_Main_Inlet_Temp +" IS_Outlet_T="+IS_Main_Outlet_Temp +" 3="+ ThreeWay_Valve_State +" wait="+waitseconds;
     s_output += " dT=" + (IS_Main_Outlet_Temp - IS_Main_Inlet_Temp) + " abst=" + (Z1HeatRequestTemperature_new - IS_Main_Outlet_Temp)+" state="+state +" VL_new="+Z1HeatRequestTemperature_new;
     s_output += " VL="+Z1HeatRequestTemperature + " cutpel=" + cutpel + " writes=" + writes;
+    s_output += " K="+ T_sollVLmin;
     if (s_outputold != s_output)
     {
         s_outputold = s_output;
