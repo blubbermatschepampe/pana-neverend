@@ -55,8 +55,14 @@ rausmachen, der Speichert jedesmal ne ganze Zeile Text.
 
 jetz neu mit Heizkurve 
 über 10 Grad AT  javascript.0.VIS.WP_T_VL_10
+
 über 5 Grad AT  javascript.0.VIS.WP_T_VL_5
+
 über 0 Grad AT  javascript.0.VIS.WP_T_VL_0
+
 über minus 5 Grad AT  javascript.0.VIS.WP_T_VL_M5
+
 über minus 10 Grad AT  javascript.0.VIS.WP_T_VL_M10
+
 unter minus 10 Grad AT  javascript.0.VIS.WP_T_VL_M15
+
