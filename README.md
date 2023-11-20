@@ -47,3 +47,8 @@ Analog dazu kann man Tmax vorgeben. Ist es draußen beispielsweise 18 Grad könn
 
 
 Naja so die Überlegung und meine Anwendung.
+
+
+Achso, falls du eine SD-Karte für die Daten nutzt, solltest du evtl den Befehl
+setState('javascript.0.VIS.output', s_output);
+rausmachen, der Speichert jedesmal ne ganze Zeile Text.
