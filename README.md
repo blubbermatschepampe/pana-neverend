@@ -67,4 +67,4 @@ jetz neu mit Heizkurve
 unter minus 10 Grad AT  javascript.0.VIS.WP_T_VL_M15
 
 ====
-Man kann bei waitseconds = 1*60; einstellen, wie schnell sie runtermodulieren soll. 0 wäre am schnellsten.
+# Man kann bei waitseconds = 1*60; einstellen, wie schnell sie runtermodulieren soll. 0 wäre am schnellsten.
