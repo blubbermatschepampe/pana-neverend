@@ -119,6 +119,18 @@ function f_bigger(value1, value2)
 	}
 	return value1;
 }
+/**
+* @param {number} value1
+* @param {number} value2
+*/
+function f_smaller(value1, value2)
+{
+	if (value1 > value2)
+	{
+		value1 = value2;
+	}
+	return value1;
+}
 //##### statemachine ###############################
 function f_statemachine()
 {
@@ -202,10 +214,16 @@ function f_statemachine()
                         Z1HeatRequestTemperature_new = Z1HeatRequestTemperature_new + 1;            //wieder einen erhöhen
                     }
                 }
+                else if (IS_Compressor_Freq <= 50)
+                {
+                    Z1HeatRequestTemperature_new = IS_Main_Inlet_Temp + dT - 1;                                          //wir haben noch nicht total begrenzt können dT etwas reduzieren
+                    Z1HeatRequestTemperature_new = f_bigger(Z1HeatRequestTemperature_new, IS_Main_Outlet_Temp - 1);
+                }
                 else
                 {
                     Z1HeatRequestTemperature_new = IS_Main_Inlet_Temp + dT - 1;                                          //wir haben noch nicht total begrenzt können dT etwas reduzieren
                     Z1HeatRequestTemperature_new = f_bigger(Z1HeatRequestTemperature_new, IS_Main_Outlet_Temp - 1);
+                    Z1HeatRequestTemperature_new = f_smaller(T_sollVLmin, Z1HeatRequestTemperature_new);
                 }
 				f_setvl(Z1HeatRequestTemperature_new);
             }
