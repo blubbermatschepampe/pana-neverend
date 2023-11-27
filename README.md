@@ -69,4 +69,4 @@ unter minus 10 Grad AT  javascript.0.VIS.WP_T_VL_M15
 ====
 # Man kann bei waitseconds = 1*60; einstellen, wie schnell sie runtermodulieren soll. 0 wäre am schnellsten.
 
-Sollwertverschiebung mache ich bei Wind z.b. auf +1 oder so. Hebt/senkt die Heizkurve an/an
+Sollwertverschiebung mache ich bei Wind z.b. auf +1 oder so. Hebt/senkt die Heizkurve an/an Slider@javascript.0.VIS.WP_T_SWV
