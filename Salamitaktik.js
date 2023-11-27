@@ -19,6 +19,7 @@ createState('javascript.0.VIS.cop', 0, {name: 'cop berechnen'});
 createState('javascript.0.VIS.output', "x", {name: 'x'});
 //createState('javascript.0.VIS.WP_T_sollVlmin', "32", {name: 'WP soll VL min'});
 
+createState('javascript.0.VIS.WP_T_SWV' , 0, {name: ''});
 createState('javascript.0.VIS.WP_T_VL_10' , 32, {name: ''});
 createState('javascript.0.VIS.WP_T_VL_5'  , 34, {name: ''});
 createState('javascript.0.VIS.WP_T_VL_0'  , 36, {name: ''});
@@ -163,6 +164,7 @@ function f_statemachine()
 	    {T_sollVLmin = getState('javascript.0.VIS.WP_T_VL_M10').val;}
     else
 	    {T_sollVLmin = getState('javascript.0.VIS.WP_T_VL_M15').val;}
+    T_sollVLmin += getState('javascript.0.VIS.WP_T_SWV').val;
     //#### for all #################################################
     if (ThreeWay_Valve_State == 1) {state = "state_ww";}
     if (Defrosting_State == 1) {state = "state_defrost";}
