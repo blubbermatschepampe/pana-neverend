@@ -29,11 +29,11 @@ createState('javascript.0.VIS.WP_T_VL_M15', 42, {name: ''});
 
 setInterval(f_statemachine, Timer_MS)
 
-let dT = 3;
+let dT = 2;
 let cutpel = 1;                 
 let T_Max = 42;
 let T_Off = 24;
-let T_sollVLmin = 32;
+let T_heizkurve = 32;       //Heizkurve
 let Z1HeatRequestTemperature = 0;
 
 let WP_T_VL_10;
@@ -54,9 +54,9 @@ function f_setvl( temp1 )
     let go_further = 1;
     temp1 = Math.trunc(temp1);
 
-    if ( temp1 < T_sollVLmin)
+    if ( temp1 < T_heizkurve)
     {
-        temp1 = T_sollVLmin;
+        temp1 = T_heizkurve;
     }
 	if ( temp1 > T_Max)
 	{
@@ -149,22 +149,21 @@ function f_statemachine()
     cutpel = getState('javascript.0.VIS.cutpel').val;   //über VIS = 0 keine Leistungsbegrenzung =1 Leistungsbegrenzung
     T_Max = getState('javascript.0.VIS.cutpeltmax').val;   //über VIS maximale Temperatur bis wohin er moduliert
     T_Off = getState('javascript.0.VIS.cutpeltoff').val;   //über VIS Temperatur die am Ende des Zyklusses eingestellt wird
-	//T_sollVLmin = getState('javascript.0.VIS.WP_T_sollVlmin').val;   //über VIS Temperatur die minimal angefahren werden soll
     let T_AT = getState(AT_MQTT).val;
 
     if (T_AT >= 10)
-        {T_sollVLmin = getState('javascript.0.VIS.WP_T_VL_10').val;}
+        {T_heizkurve = getState('javascript.0.VIS.WP_T_VL_10').val;}
     else if (T_AT >= 5)
-	    {T_sollVLmin = getState('javascript.0.VIS.WP_T_VL_5').val;}
+	    {T_heizkurve = getState('javascript.0.VIS.WP_T_VL_5').val;}
     else if (T_AT >= 0)
-	    {T_sollVLmin = getState('javascript.0.VIS.WP_T_VL_0').val;}
+	    {T_heizkurve = getState('javascript.0.VIS.WP_T_VL_0').val;}
     else if (T_AT >= -5)
-	    {T_sollVLmin = getState('javascript.0.VIS.WP_T_VL_M5').val;}
+	    {T_heizkurve = getState('javascript.0.VIS.WP_T_VL_M5').val;}
     else if (T_AT >= -10)
-	    {T_sollVLmin = getState('javascript.0.VIS.WP_T_VL_M10').val;}
+	    {T_heizkurve = getState('javascript.0.VIS.WP_T_VL_M10').val;}
     else
-	    {T_sollVLmin = getState('javascript.0.VIS.WP_T_VL_M15').val;}
-    T_sollVLmin += getState('javascript.0.VIS.WP_T_SWV').val;
+	    {T_heizkurve = getState('javascript.0.VIS.WP_T_VL_M15').val;}
+    T_heizkurve += getState('javascript.0.VIS.WP_T_SWV').val;
     //#### for all #################################################
     if (ThreeWay_Valve_State == 1) {state = "state_ww";}
     if (Defrosting_State == 1) {state = "state_defrost";}
@@ -225,7 +224,7 @@ function f_statemachine()
                 {
                     Z1HeatRequestTemperature_new = IS_Main_Inlet_Temp + dT - 1;                                          //wir haben noch nicht total begrenzt können dT etwas reduzieren
                     Z1HeatRequestTemperature_new = f_bigger(Z1HeatRequestTemperature_new, IS_Main_Outlet_Temp - 1);
-                    Z1HeatRequestTemperature_new = f_smaller(T_sollVLmin, Z1HeatRequestTemperature_new);
+                    //Z1HeatRequestTemperature_new = f_smaller(T_heizkurve, Z1HeatRequestTemperature_new);
                 }
 				f_setvl(Z1HeatRequestTemperature_new);
             }
@@ -241,7 +240,7 @@ function f_statemachine()
     let s_output = "Freq="+IS_Compressor_Freq +" IS_Inlet_T="+IS_Main_Inlet_Temp +" IS_Outlet_T="+IS_Main_Outlet_Temp +" 3="+ ThreeWay_Valve_State +" wait="+waitseconds;
     s_output += " dT=" + (IS_Main_Outlet_Temp - IS_Main_Inlet_Temp) + " abst=" + (Z1HeatRequestTemperature_new - IS_Main_Outlet_Temp)+" state="+state +" VL_new="+Z1HeatRequestTemperature_new;
     s_output += " VL="+Z1HeatRequestTemperature + " cutpel=" + cutpel + " writes=" + writes;
-    s_output += " K="+ T_sollVLmin;
+    s_output += " K="+ T_heizkurve;
     if (s_outputold != s_output)
     {
         s_outputold = s_output;
