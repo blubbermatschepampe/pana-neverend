@@ -266,7 +266,7 @@ function f_statemachine()
 
             if (ThreeWay_Valve_State == 0) 
             { 
-                waitseconds2 = 20*60;
+                waitseconds2 = 40*60;
                 state = "state_after_ww";
             }
         break;
@@ -279,7 +279,8 @@ function f_statemachine()
             else
             {
                 Z1HeatRequestTemperature_new = f_new_vl_soll(Z1HeatRequestTemperature_new, IS_Compressor_Freq, IS_Main_Inlet_Temp, IS_Main_Outlet_Temp)
-                f_setvl(Z1HeatRequestTemperature_new, T_heizkurve, 58);
+                //f_setvl(Z1HeatRequestTemperature_new, T_heizkurve, 58);
+                f_setvlforce(Z1HeatRequestTemperature_new);
             }
             
             if ((waitseconds2 == 0) || (IS_Compressor_Freq == 0))
