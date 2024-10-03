@@ -1,3 +1,10 @@
+/* -- do not edit following lines - START --
+{
+  "expert": true,
+  "debug": false,
+  "verbose": false
+}
+-- do not edit previous lines - END --*/
 const SetZ1HeatRequestTemperature_MQTT = 'mqtt.0.panasonic_heat_pump.commands.SetZ1HeatRequestTemperature';
 const Compressor_Freq_MQTT = 'mqtt.0.panasonic_heat_pump.main.Compressor_Freq';
 const ThreeWay_Valve_State_MQTT = 'mqtt.0.panasonic_heat_pump.main.ThreeWay_Valve_State';
@@ -14,20 +21,23 @@ const Operating_Mode_State_MQTT = 'mqtt.0.panasonic_heat_pump.main.Operating_Mod
 const Timer_MS = 1000;
 
 //startup
-createState('javascript.0.VIS.cutpel', 1, {name: 'cut p electric'});
-createState('javascript.0.VIS.cutpeltmax', 42, {name: 'cut p electric tmax'});
-createState('javascript.0.VIS.cutpeltoff', 24, {name: 'cut p electric toff'});
-createState('javascript.0.VIS.cop', 0, {name: 'cop berechnen'});
-createState('javascript.0.VIS.dhwcop', 0, {name: 'dhwcop berechnen'});
-createState('javascript.0.VIS.output', "x", {name: 'x'});
+//die folgenden createState koennen als slider im Vis angelegt werden und dienen dann der Eingabe von Werten
+createState('javascript.0.VIS.cutpel', 1, {name: 'cut p electric'});                //werte Skript aus =0 und Skript läuft =1 
+createState('javascript.0.VIS.cutpeltmax', 42, {name: 'cut p electric tmax'});      //maximale Temperatur bis zu der die WP hochfahren soll, wenn sie auf 19Hz läuft
+createState('javascript.0.VIS.cutpeltoff', 24, {name: 'cut p electric toff'});      //Temperatur, die als neue Vorlauftemperatur eingestellt werden soll, nachdem der Kompresso gestoppt ist
+createState('javascript.0.VIS.cop', 0, {name: 'cop berechnen'});                    //hier wird der COP angezeigt (kein Slider sondern eine Zahl anzeigen in der VIS)
+createState('javascript.0.VIS.dhwcop', 0, {name: 'dhwcop berechnen'});              //s.o. jedoch für Warmwasser
+createState('javascript.0.VIS.output', "x", {name: 'x'});                           //eine Textausgabe, die z.b. den Verbrauch in Kwh seit 0 Uhr anzeigt, geht nur mit S0 Zähler am Heishamon
 
-createState('javascript.0.VIS.WP_T_SWV' , 0, {name: ''});
-createState('javascript.0.VIS.WP_T_VL_10' , 32, {name: ''});
-createState('javascript.0.VIS.WP_T_VL_5'  , 34, {name: ''});
-createState('javascript.0.VIS.WP_T_VL_0'  , 36, {name: ''});
-createState('javascript.0.VIS.WP_T_VL_M5' , 38, {name: ''});
-createState('javascript.0.VIS.WP_T_VL_M10', 40, {name: ''});
-createState('javascript.0.VIS.WP_T_VL_M15', 42, {name: ''});
+createState('javascript.0.VIS.WP_T_SWV' , 0, {name: ''});                           //Sollwertverschiebung der Heizkurve
+createState('javascript.0.VIS.WP_T_VL_10' , 32, {name: ''});                        //Heizkurve für AT > 10
+createState('javascript.0.VIS.WP_T_VL_5'  , 34, {name: ''});                        //Heizkurve für AT > 5
+createState('javascript.0.VIS.WP_T_VL_0'  , 36, {name: ''});                        //Heizkurve für AT > 0
+createState('javascript.0.VIS.WP_T_VL_M5' , 38, {name: ''});                        //Heizkurve für AT > -5
+createState('javascript.0.VIS.WP_T_VL_M10', 40, {name: ''});                        //Heizkurve für AT > -10
+createState('javascript.0.VIS.WP_T_VL_M15', 42, {name: ''});                        //Heizkurve für AT > -15
+
+//zum besseren Verständnis des Sourcetextes unten bei f_statemachine() weiterlesen, hier oben sind erstmal die unterroutinen programmiert.
 
 setInterval(f_statemachine, Timer_MS)
 
@@ -272,18 +282,18 @@ function f_statemachine()
         break;
         //#####################################################
         case "state_after_ww":
+            Z1HeatRequestTemperature_new = f_new_vl_soll(Z1HeatRequestTemperature_new, IS_Compressor_Freq, IS_Main_Inlet_Temp, IS_Main_Outlet_Temp)
             if (Operating_Mode_State == 3)
             { 
             
             }
             else
             {
-                Z1HeatRequestTemperature_new = f_new_vl_soll(Z1HeatRequestTemperature_new, IS_Compressor_Freq, IS_Main_Inlet_Temp, IS_Main_Outlet_Temp)
                 //f_setvl(Z1HeatRequestTemperature_new, T_heizkurve, 58);
                 f_setvlforce(Z1HeatRequestTemperature_new);
             }
             
-            if ((waitseconds2 == 0) || (IS_Compressor_Freq == 0))
+            if ((waitseconds2 == 0) || (IS_Compressor_Freq == 0) || (T_heizkurve > Z1HeatRequestTemperature_new))
             { 
                 state = "state_komp_running";
             }
