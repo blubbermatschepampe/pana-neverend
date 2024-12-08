@@ -1,18 +1,11 @@
-/* -- do not edit following lines - START --
-{
-  "expert": true,
-  "debug": false,
-  "verbose": false
-}
--- do not edit previous lines - END --*/
 const SetZ1HeatRequestTemperature_MQTT = 'mqtt.0.panasonic_heat_pump.commands.SetZ1HeatRequestTemperature';
 const Compressor_Freq_MQTT = 'mqtt.0.panasonic_heat_pump.main.Compressor_Freq';
 const ThreeWay_Valve_State_MQTT = 'mqtt.0.panasonic_heat_pump.main.ThreeWay_Valve_State';
 const Main_Outlet_Temp_MQTT = 'mqtt.0.panasonic_heat_pump.main.Main_Outlet_Temp';
 const Main_Inlet_Temp_MQTT = 'mqtt.0.panasonic_heat_pump.main.Main_Inlet_Temp';
-const Watt1_MQTT = 'mqtt.0.panasonic_heat_pump.s0.Watt.1';
-const Heat_Power_Production_MQTT = 'mqtt.0.panasonic_heat_pump.main.Heat_Power_Production';
-const DHW_Power_Production_MQTT = 'mqtt.0.panasonic_heat_pump.main.DHW_Power_Production';
+//const Watt1_MQTT = 'mqtt.0.panasonic_heat_pump.s0.Watt.1';
+//const Heat_Power_Production_MQTT = 'mqtt.0.panasonic_heat_pump.main.Heat_Power_Production';
+//const DHW_Power_Production_MQTT = 'mqtt.0.panasonic_heat_pump.main.DHW_Power_Production';
 const Defrosting_State_MQTT = 'mqtt.0.panasonic_heat_pump.main.Defrosting_State';
 const AT_MQTT = 'mqtt.0.panasonic_heat_pump.main.Outside_Temp';
 const Operating_Mode_State_MQTT = 'mqtt.0.panasonic_heat_pump.main.Operating_Mode_State';
@@ -37,6 +30,7 @@ createState('javascript.0.VIS.WP_T_VL_M5' , 38, {name: ''});                    
 createState('javascript.0.VIS.WP_T_VL_M10', 40, {name: ''});                        //Heizkurve für AT > -10
 createState('javascript.0.VIS.WP_T_VL_M15', 42, {name: ''});                        //Heizkurve für AT > -15
 
+//createState('mqtt.0.panasonic_heat_pump.commands.SetDHWHeatDelta', 3, {name: ''});
 //zum besseren Verständnis des Sourcetextes unten bei f_statemachine() weiterlesen, hier oben sind erstmal die unterroutinen programmiert.
 
 setInterval(f_statemachine, Timer_MS)
@@ -81,7 +75,7 @@ function f_setvl( T_temp1lokal, T_minlokal, T_maxlokal )
 	{
 		T_temp1lokal = T_maxlokal;
 	}
-    console.log("z1 " +Z1HeatRequestTemperature + " T_temp1lokal " + T_temp1lokal + " writes" + writes);
+    //console.log("z1 " +Z1HeatRequestTemperature + " T_temp1lokal " + T_temp1lokal + " writes" + writes);
     if (T_temp1lokal != Z1HeatRequestTemperature)
     {
         //ungleich old und kleiner T_maxlokal
@@ -209,9 +203,9 @@ function f_statemachine()
     let IS_Main_Outlet_Temp = getState(Main_Outlet_Temp_MQTT).val;
     let IS_Main_Inlet_Temp = getState(Main_Inlet_Temp_MQTT).val;
     let ThreeWay_Valve_State = getState(ThreeWay_Valve_State_MQTT).val;
-    let Watt1 = getState(Watt1_MQTT).val;
-    let Heat_Power_Production = getState(Heat_Power_Production_MQTT).val;
-    let DHW_Power_Production = getState(DHW_Power_Production_MQTT).val;
+    //let Watt1 = getState(Watt1_MQTT).val;
+    //let Heat_Power_Production = getState(Heat_Power_Production_MQTT).val;
+    //let DHW_Power_Production = getState(DHW_Power_Production_MQTT).val;
     let Defrosting_State = getState(Defrosting_State_MQTT).val;
     let Operating_Mode_State = getState(Operating_Mode_State_MQTT).val;
     let Z1HeatRequestTemperature_new = 0;
@@ -334,10 +328,10 @@ function f_statemachine()
         s_outputold = s_output;
         console.log(s_output);
         //console.log("Watt1=" + Watt1 + " COP=" + (Heat_Energy_Production/Watt1).toFixed(2) + " cutpel=" + cutpel);
-        if (Watt1 != 0)
+        //if (Watt1 != 0)
         {
-            setState('javascript.0.VIS.cop', (Heat_Power_Production/Watt1).toFixed(2));
-            setState('javascript.0.VIS.dhwcop', (DHW_Power_Production/Watt1).toFixed(2));
+            //setState('javascript.0.VIS.cop', (Heat_Power_Production/Watt1).toFixed(2));
+            //setState('javascript.0.VIS.dhwcop', (DHW_Power_Production/Watt1).toFixed(2));
         }
         setState('javascript.0.VIS.output', s_output);
     }
